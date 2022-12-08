@@ -1,18 +1,25 @@
+/// OBSERVATION: Both html files reference this Javascript file 
+
 let noteTitle;
 let noteText;
 let saveNoteBtn;
 let newNoteBtn;
 let noteList;
 
+console.log(window.location.pathname) /// '/notes"
+
+/// QUESTOIN: Why make these conditional? Does it save memory? 
 if (window.location.pathname === '/notes') {
-  noteTitle = document.querySelector('.note-title');
-  noteText = document.querySelector('.note-textarea');
-  saveNoteBtn = document.querySelector('.save-note');
-  newNoteBtn = document.querySelector('.new-note');
+  noteTitle = document.querySelector('.note-title'); /// verified
+  noteText = document.querySelector('.note-textarea'); /// verified
+  saveNoteBtn = document.querySelector('.save-note'); /// verified
+  newNoteBtn = document.querySelector('.new-note'); /// verified
   noteList = document.querySelectorAll('.list-container .list-group');
 }
 
 // Show an element
+/// These are used in the handleRenderSaveBtn function
+/// QUESTION: How does this hide and show features?
 const show = (elem) => {
   elem.style.display = 'inline';
 };
@@ -26,22 +33,31 @@ const hide = (elem) => {
 let activeNote = {};
 
 const getNotes = () =>
-  fetch('/api/notes', {
+  fetch('/api/notes', { 
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
   });
 
+/// Save Note: Step 3
+/// Reference: 11-Express > 08-Stu_GET-Fetch, 20-Stu_Data-Persistence
 const saveNote = (note) =>
-  fetch('/api/notes', {
+  fetch('/api/notes', { 
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
     body: JSON.stringify(note),
-  });
-
+  })
+    /// console.log(body) -- body is not defined. If uncommented, it pauses the code
+    /// console.log(note.body) -- body is not defined. If uncommented, it pauses the code
+    .then((res) => res.json())
+    .then((data) => {
+      console.log(data)
+      return data
+    })
+    
 const deleteNote = (id) =>
   fetch(`/api/notes/${id}`, {
     method: 'DELETE',
@@ -66,6 +82,7 @@ const renderActiveNote = () => {
   }
 };
 
+/// Save Note: Step 2 & Step 4 (render notes)
 const handleNoteSave = () => {
   const newNote = {
     title: noteTitle.value,
@@ -108,13 +125,21 @@ const handleNewNoteView = (e) => {
   renderActiveNote();
 };
 
+/// Save Note: Step 1 -- Shows the Save Button & Function Explanation
+/// There are two event listeners (noteTitle and noteText keyup) that trigger this function
+/// If either do not hold a value, the save button stays hidden. If both hold values, then the save button appears.
+/// Clicking the save button calls the function handleNoteSave
+/// hide() and show() are functions with the parameter saveNoteBtn passed in
 const handleRenderSaveBtn = () => {
+  /// console.log(noteTitle.value)
+  /// console.log(noteText.value)
   if (!noteTitle.value.trim() || !noteText.value.trim()) {
     hide(saveNoteBtn);
   } else {
     show(saveNoteBtn);
   }
 };
+
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
@@ -171,13 +196,15 @@ const renderNoteList = async (notes) => {
 };
 
 // Gets notes from the db and renders them to the sidebar
+/// Two functions: (1) getNotes, (2) renderNoteList
 const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
 if (window.location.pathname === '/notes') {
-  saveNoteBtn.addEventListener('click', handleNoteSave);
+  saveNoteBtn.addEventListener('click', handleNoteSave); // saves the new note after save has been clicked
   newNoteBtn.addEventListener('click', handleNewNoteView);
-  noteTitle.addEventListener('keyup', handleRenderSaveBtn);
-  noteText.addEventListener('keyup', handleRenderSaveBtn);
+  noteTitle.addEventListener('keyup', handleRenderSaveBtn); // triggers the save button to appear
+  noteText.addEventListener('keyup', handleRenderSaveBtn); // triggers the save button to appear
 }
 
 getAndRenderNotes();
+
