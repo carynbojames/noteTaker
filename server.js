@@ -22,10 +22,20 @@ app.get('/notes', (req, res) => res.sendFile(path.join(__dirname, '/public/notes
 /// Previously getting URL not found errors. index.js had URLs, but the server did not have the URLs
 app.get('/api/notes', (req, res) => {
   /// send message to the client
-  res.status(200).json(`${req.method} request received`) 
+  // res.status(200).json(`${req.method} request received`) /// Verified received at URL/api/notes
   
   /// send message to the terminal
-  console.info(`${req.method} request received`)
+  console.info(`${req.method} request received`) /// verified received in terminal
+
+  fs.readFile('./db/db.json', 'utf8', (err, data) => {
+    if (err) {
+      console.error(err)
+    } else {
+      const parsedPost = JSON.parse(data)
+      console.log('parsedPost', parsedPost) /// verified received in terminal as an array of objects
+      console.log('stringify:', JSON.stringify(parsedPost)) /// not necessary, but to see what it does
+      res.status(200).json(parsedPost) /// If I comment this out, then the code stops here. It does not move from getNotes to here and back to renderNoteList function. I had a console.log("Hello"). It didn't come through. It didn't come through because there was no response.
+    }})
 })
 
 app.post('/api/notes', (req, res) => {
@@ -34,7 +44,7 @@ app.post('/api/notes', (req, res) => {
     title,
     text
   }
-  console.log(newPost)
+  console.log('newPost', newPost) /// verified
 
   /// Requires both fs.readFile and fs.writeFile
   /// fs.readFile gets existing data. Push new data. Re-write the file using fs.writeFile
@@ -48,11 +58,13 @@ app.post('/api/notes', (req, res) => {
       const parsedPost = JSON.parse(data)
       parsedPost.push(newPost)
 
-      fs.writeFile('./db/db.json', JSON.stringify(parsedPost), (err) => err ? console.error(err) : console.info('Success'))
+      fs.writeFile('./db/db.json', JSON.stringify(parsedPost), (err) => err ? console.error(err) : console.info('Success')) /// verified, received success
+      res.status(200).json(parsedPost)
     }
   })
-
 })
+
+
 
 // Starts the server to begin listening
 app.listen(PORT, () => {

@@ -14,7 +14,9 @@ if (window.location.pathname === '/notes') {
   noteText = document.querySelector('.note-textarea'); /// verified
   saveNoteBtn = document.querySelector('.save-note'); /// verified
   newNoteBtn = document.querySelector('.new-note'); /// verified
-  noteList = document.querySelectorAll('.list-container .list-group');
+  noteList = document.querySelectorAll('.list-container .list-group'); 
+  /// Finds all elements that have the class
+  /// With two class elements, does it find the first then the second? In this instance, there's only one .list-group
 }
 
 // Show an element
@@ -32,13 +34,29 @@ const hide = (elem) => {
 // activeNote is used to keep track of the note in the textarea
 let activeNote = {};
 
+/// Allows you to pull data from a different url source
 const getNotes = () =>
   fetch('/api/notes', { 
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',
     },
-  });
+  })
+    /// Added. May not be necessary
+    // .then((response) => (response).json())
+    // .then((data) => {
+    //   console.log('data:', data)
+    // })
+    // .catch((error) => {
+    //   console.error('Error:', error)
+    // })
+
+/// Is this needed or does it happen somewhere else in the code? 
+/// Didn't work
+const emptyForm = () => {
+  noteTitle.value = ''
+  noteText.value = ''
+}
 
 /// Save Note: Step 3
 /// Reference: 11-Express > 08-Stu_GET-Fetch, 20-Stu_Data-Persistence
@@ -52,11 +70,12 @@ const saveNote = (note) =>
   })
     /// console.log(body) -- body is not defined. If uncommented, it pauses the code
     /// console.log(note.body) -- body is not defined. If uncommented, it pauses the code
-    .then((res) => res.json())
-    .then((data) => {
-      console.log(data)
-      return data
-    })
+    // .then((res) => res.json()) /// Is this necessary?
+    // .then((data) => {
+    //   console.log(data)
+    //   emptyForm() 
+    //   return data /// Is this necessary?
+    // })
     
 const deleteNote = (id) =>
   fetch(`/api/notes/${id}`, {
@@ -89,7 +108,7 @@ const handleNoteSave = () => {
     text: noteText.value,
   };
   saveNote(newNote).then(() => {
-    getAndRenderNotes();
+    getAndRenderNotes(); /// this works
     renderActiveNote();
   });
 };
@@ -140,18 +159,23 @@ const handleRenderSaveBtn = () => {
   }
 };
 
+/// Above
+/// noteList = document.querySelectorAll('.list-container .list-group');
 
 // Render the list of note titles
 const renderNoteList = async (notes) => {
+  console.log('Hello') /// verified in console
   let jsonNotes = await notes.json();
+  console.log('jsonNotes:', jsonNotes) /// verified in console
+
   if (window.location.pathname === '/notes') {
-    noteList.forEach((el) => (el.innerHTML = ''));
+    noteList.forEach((el) => (el.innerHTML = '')); /// Deletes the HTML content for all the elements in noteList (ref: https://www.w3schools.com/jsref/prop_html_innerhtml.asp)
   }
 
   let noteListItems = [];
 
   // Returns HTML element with or without a delete button
-  const createLi = (text, delBtn = true) => {
+  const createLi = (text, delBtn = true) => { /// Where is the delete btn?
     const liEl = document.createElement('li');
     liEl.classList.add('list-group-item');
 
@@ -160,9 +184,9 @@ const renderNoteList = async (notes) => {
     spanEl.innerText = text;
     spanEl.addEventListener('click', handleNoteView);
 
-    liEl.append(spanEl);
+    liEl.append(spanEl); /// Add spanEl to liEl
 
-    if (delBtn) {
+    if (delBtn) { /// Won't this also be true, since delBtn = true is defined above. Below defines delBtn as false when there are no notes
       const delBtnEl = document.createElement('i');
       delBtnEl.classList.add(
         'fas',
@@ -173,10 +197,10 @@ const renderNoteList = async (notes) => {
       );
       delBtnEl.addEventListener('click', handleNoteDelete);
 
-      liEl.append(delBtnEl);
+      liEl.append(delBtnEl); /// Add delBtnEl to liEl
     }
 
-    return liEl;
+    return liEl; /// return the entire liEl created
   };
 
   if (jsonNotes.length === 0) {
@@ -201,10 +225,11 @@ const getAndRenderNotes = () => getNotes().then(renderNoteList);
 
 if (window.location.pathname === '/notes') {
   saveNoteBtn.addEventListener('click', handleNoteSave); // saves the new note after save has been clicked
-  newNoteBtn.addEventListener('click', handleNewNoteView);
+  newNoteBtn.addEventListener('click', handleNewNoteView); 
   noteTitle.addEventListener('keyup', handleRenderSaveBtn); // triggers the save button to appear
   noteText.addEventListener('keyup', handleRenderSaveBtn); // triggers the save button to appear
 }
 
 getAndRenderNotes();
 
+/// handleNewNoteView is dependent on newNoteBtn. The initial field forms exist. Would it bypass the need to click on the new note button
