@@ -59,6 +59,7 @@ app.post('/api/notes', (req, res) => {
       parsedPost.push(newPost)
 
       fs.writeFile('./db/db.json', JSON.stringify(parsedPost), (err) => err ? console.error(err) : console.info('Success')) /// verified, received success
+      
       res.status(200).json(parsedPost)
     }
   })

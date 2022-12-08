@@ -42,7 +42,7 @@ const getNotes = () =>
       'Content-Type': 'application/json',
     },
   })
-    /// Added. May not be necessary
+    /// Added. Not necessary
     // .then((response) => (response).json())
     // .then((data) => {
     //   console.log('data:', data)
@@ -50,13 +50,6 @@ const getNotes = () =>
     // .catch((error) => {
     //   console.error('Error:', error)
     // })
-
-/// Is this needed or does it happen somewhere else in the code? 
-/// Didn't work
-const emptyForm = () => {
-  noteTitle.value = ''
-  noteText.value = ''
-}
 
 /// Save Note: Step 3
 /// Reference: 11-Express > 08-Stu_GET-Fetch, 20-Stu_Data-Persistence
@@ -87,17 +80,33 @@ const deleteNote = (id) =>
 
 const renderActiveNote = () => {
   hide(saveNoteBtn);
+  console.log('Hello from renderActiveNote function') /// verified
+  console.log('activeNote', activeNote) /// verified -- When handleNewNoteView function is triggered, this console logs as an empty array
 
-  if (activeNote.id) {
+  /// Previously activeNote.id. Changed to activeNote and it functions properly
+  console.log('empty string:', activeNote == "")
+  console.log('empty string (not):', !activeNote == "")
+  console.log('object length is 0:', Object.keys(activeNote).length === 0)
+  console.log('object length is 0 (not w/o ()):', !Object.keys(activeNote).length === 0)
+  console.log('object length is 0 (not w/ ()):', !(Object.keys(activeNote).length === 0))
+  /// An object with value and an object without values, return the same reuslts for the console logs above. Need to find an argument that creates different results. 
+  // if (!activeNote == "") {
+  if (!(Object.keys(activeNote).length === 0)) {
+    /// Change element features
     noteTitle.setAttribute('readonly', true);
     noteText.setAttribute('readonly', true);
+    /// Assigning values
     noteTitle.value = activeNote.title;
     noteText.value = activeNote.text;
+    /// Where is this being called that it would choose this instead? 
+    /// When handleNewNoteView function is triggered
   } else {
-    noteTitle.removeAttribute('readonly');
+    // noteTitle.setAttribute('readonly', false); --- This did not work. Why?
+    noteTitle.removeAttribute('readonly')
     noteText.removeAttribute('readonly');
     noteTitle.value = '';
     noteText.value = '';
+    /// Validated the removeattribute method works. Hard-coded readonly=true into the noteText.    
   }
 };
 
@@ -113,6 +122,7 @@ const handleNoteSave = () => {
   });
 };
 
+/// Attribute added when the card was rendered
 // Delete the clicked note
 const handleNoteDelete = (e) => {
   // Prevents the click listener for the list from being called when the button inside of it is clicked
@@ -131,6 +141,7 @@ const handleNoteDelete = (e) => {
   });
 };
 
+/// An event listener is added to each note when it's rendered
 // Sets the activeNote and displays it
 const handleNoteView = (e) => {
   e.preventDefault();
@@ -138,9 +149,13 @@ const handleNoteView = (e) => {
   renderActiveNote();
 };
 
-// Sets the activeNote to and empty object and allows the user to enter a new note
+// Sets the activeNote to an empty object and allows the user to enter a new note
 const handleNewNoteView = (e) => {
-  activeNote = {};
+  /// Option 1
+  activeNote = {} 
+  /// Option 2
+  /// activteNote = ""
+  /// Changed this to an empty string from an empty object for condition in the renderActiveNote function
   renderActiveNote();
 };
 
@@ -159,10 +174,8 @@ const handleRenderSaveBtn = () => {
   }
 };
 
-/// Above
-/// noteList = document.querySelectorAll('.list-container .list-group');
-
 // Render the list of note titles
+/// Above --- noteList = document.querySelectorAll('.list-container .list-group');
 const renderNoteList = async (notes) => {
   console.log('Hello') /// verified in console
   let jsonNotes = await notes.json();
@@ -183,6 +196,7 @@ const renderNoteList = async (notes) => {
     spanEl.classList.add('list-item-title');
     spanEl.innerText = text;
     spanEl.addEventListener('click', handleNoteView);
+    /// EventListener isn't in the DOM. It can be seen in the event listener tab in the console
 
     liEl.append(spanEl); /// Add spanEl to liEl
 
